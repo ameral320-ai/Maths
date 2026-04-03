@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MathStudio | Interactive Mathematics Operations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f1f4fc 0%, #e9eefa 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        /* main card container */
+        .math-card {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(0px);
+            border-radius: 3rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* header section */
+        .hero {
+            background: #0b2b44;
+            background: linear-gradient(135deg, #0f2c3f 0%, #1b4f6e 100%);
+            padding: 1.8rem 2rem;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hero h1 span {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.2rem 0.8rem;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .hero p {
+            margin-top: 0.6rem;
+            opacity: 0.85;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        /* two column layout */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 2rem 2rem 2rem 2rem;
+        }
+
+        /* left panel: operations + inputs */
+        .operations-panel {
+            flex: 1.2;
+            min-width: 280px;
+            background: #ffffffcc;
+            border-radius: 2rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        /* right panel: results & history */
+        .results-panel {
+            flex: 1;
+            min-width: 280px;
+            background: #ffffffcc;
+            border-radius: 2rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #0f2c3f;
+            border-left: 5px solid #2c7da0;
+            padding-left: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #1e4a6b;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            font-size: 1rem;
+            border: 1.5px solid #dce5f0;
+            border-radius: 1.5rem;
+            background: white;
+            transition: 0.2s;
+            outline: none;
+            font-weight: 500;
+        }
+
+        .input-field:focus {
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44, 125, 160, 0.2);
+        }
+
+        .operation-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+            gap: 0.8rem;
+            margin: 1.5rem 0 1.8rem 0;
+        }
+
+        .op-btn {
+            background: #f0f4f9;
+            border: none;
+            padding: 0.8rem 0.2rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #1f506e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .op-btn:hover {
+            background: #e2e9f2;
+            transform: translateY(-2px);
+        }
+
+        .op-btn:active {
+            transform: translateY(1px);
+        }
+
+        .primary-action {
+            background: #2c7da0;
+            color: white;
+            box-shadow: 0 4px 8px rgba(44,125,160,0.2);
+        }
+
+        .primary-action:hover {
+            background: #1f5e7e;
+        }
+
+        .reset-btn {
+            background: #eef2f7;
+            color: #5a6874;
+            border: 1px solid #dce3ec;
+        }
+
+        .result-area {
+            background: #f8fafd;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            margin: 1.5rem 0 1.2rem;
+            text-align: center;
+            box-shadow: inset 0 1px 3px #00000008, 0 2px 4px #ffffff;
+            border: 1px solid #e2edf7;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #4f6f8f;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0b2b44;
+            word-break: break-word;
+            line-height: 1.2;
+            margin-top: 6px;
+        }
+
+        .history-list {
+            max-height: 280px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            border-radius: 1.2rem;
+        }
+
+        .history-item {
+            background: white;
+            padding: 0.7rem 1rem;
+            margin-bottom: 0.6rem;
+            border-radius: 1.2rem;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #2c7da0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            transition: 0.1s;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        .history-expression {
+            font-weight: 600;
+            color: #1c445e;
+        }
+
+        .history-result {
+            font-weight: 700;
+            background: #eef3fc;
+            padding: 0.2rem 0.7rem;
+            border-radius: 2rem;
+            color: #0f4c6b;
+        }
+
+        .clear-history {
+            background: none;
+            border: none;
+            font-size: 0.75rem;
+            color: #8ba0b0;
+            cursor: pointer;
+            margin-top: 0.6rem;
+            text-align: right;
+            display: inline-block;
+            font-weight: 500;
+            transition: 0.1s;
+        }
+
+        .clear-history:hover {
+            color: #c23b22;
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            color: #c44536;
+            font-size: 0.8rem;
+            margin-top: 0.4rem;
+            font-weight: 500;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        hr {
+            margin: 0.8rem 0;
+            border: none;
+            border-top: 1px solid #e0e9f2;
+        }
+
+        footer {
+            background: #ffffffb3;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #4a627a;
+            padding: 1rem;
+            border-top: 1px solid #dce5ef;
+        }
+
+        @media (max-width: 700px) {
+            .dashboard {
+                padding: 1.2rem;
+            }
+            .result-value {
+                font-size: 1.8rem;
+            }
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="math-card">
+    <div class="hero">
+        <h1>
+            📐 Math Operations Studio 
+            <span>➕ − ✖️ ÷ ⚡</span>
+        </h1>
+        <p>Perform arithmetic, exponentiation, modulus & more — see instant results and track your calculation history.</p>
+    </div>
+
+    <div class="dashboard">
+        <!-- LEFT PANEL: Inputs & operations -->
+        <div class="operations-panel">
+            <div class="section-title">🔢 Number inputs</div>
+            <div class="input-group">
+                <label>🔹 First number (A)</label>
+                <input type="number" id="numA" class="input-field" placeholder="e.g., 24" value="12" step="any">
+            </div>
+            <div class="input-group">
+                <label>🔸 Second number (B)</label>
+                <input type="number" id="numB" class="input-field" placeholder="e.g., 8" value="4" step="any">
+            </div>
+
+            <div class="section-title" style="margin-top: 0.5rem;">🧮 Operations</div>
+            <div class="operation-buttons">
+                <button class="op-btn" data-op="add">➕ Add</button>
+                <button class="op-btn" data-op="subtract">➖ Subtract</button>
+                <button class="op-btn" data-op="multiply">✖️ Multiply</button>
+                <button class="op-btn" data-op="divide">➗ Divide</button>
+                <button class="op-btn" data-op="power">🔺 Power (Aᴮ)</button>
+                <button class="op-btn" data-op="modulus">🧮 Modulo (A % B)</button>
+            </div>
+
+            <div class="flex-between">
+                <div class="section-title" style="margin-bottom: 0;">⚡ Quick actions</div>
+                <button id="clearAllFields" class="clear-history" style="font-size:0.8rem;">⟳ Reset fields</button>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 12px;">
+                <button id="swapValuesBtn" class="op-btn reset-btn" style="flex:1;">🔄 Swap A ↔ B</button>
+                <button id="setRandomBtn" class="op-btn reset-btn" style="flex:1;">🎲 Random values</button>
+            </div>
+            <div class="error-msg" id="errorMessage"></div>
+        </div>
+
+        <!-- RIGHT PANEL: Results + history -->
+        <div class="results-panel">
+            <div class="section-title">📊 Current result</div>
+            <div class="result-area" id="resultArea">
+                <div class="result-label">Computed value</div>
+                <div class="result-value" id="mainResult">—</div>
+                <div class="result-label" id="operationLabel" style="margin-top: 8px;">Ready</div>
+            </div>
+
+            <div class="flex-between">
+                <div class="section-title" style="margin-bottom: 0;">📜 History log</div>
+                <button id="clearHistoryBtn" class="clear-history">🗑 Clear history</button>
+            </div>
+            <div id="historyContainer" class="history-list">
+                <div style="text-align: center; color: #8aa0b2; padding: 1rem;">No calculations yet.<br>Press any operation ✨</div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        ⚡ Supports integers, decimals, exponentiation & modulus. Division by zero shows error. Power: A raised to B.
+    </footer>
+</div>
+
+<script>
+    // DOM elements
+    const inputA = document.getElementById('numA');
+    const inputB = document.getElementById('numB');
+    const mainResultSpan = document.getElementById('mainResult');
+    const operationLabelSpan = document.getElementById('operationLabel');
+    const errorMsgDiv = document.getElementById('errorMessage');
+    const historyContainer = document.getElementById('historyContainer');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const clearAllFieldsBtn = document.getElementById('clearAllFields');
+    const swapValuesBtn = document.getElementById('swapValuesBtn');
+    const setRandomBtn = document.getElementById('setRandomBtn');
+
+    // Operation buttons
+    const addBtn = document.querySelector('[data-op="add"]');
+    const subtractBtn = document.querySelector('[data-op="subtract"]');
+    const multiplyBtn = document.querySelector('[data-op="multiply"]');
+    const divideBtn = document.querySelector('[data-op="divide"]');
+    const powerBtn = document.querySelector('[data-op="power"]');
+    const modulusBtn = document.querySelector('[data-op="modulus"]');
+
+    // History storage (max 30 entries)
+    let historyEntries = [];   // each entry: { expression, result, timestamp }
+
+    // Helper: get current numbers as float
+    function getNumbers() {
+        let a = parseFloat(inputA.value);
+        let b = parseFloat(inputB.value);
+        // preserve raw values but treat NaN as 0 for safety? we handle NaN in operations.
+        if (isNaN(a)) a = 0;
+        if (isNaN(b)) b = 0;
+        return { a, b, rawA: inputA.value, rawB: inputB.value };
+    }
+
+    // clear error message
+    function clearError() {
+        errorMsgDiv.innerText = '';
+    }
+
+    // set error display
+    function showError(message) {
+        errorMsgDiv.innerText = message;
+        operationLabelSpan.innerText = '⚠️ Error';
+        mainResultSpan.innerText = 'Invalid';
+    }
+
+    // add entry to history (max 30)
+    function addHistory(expression, resultValue) {
+        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute:'2-digit', second:'2-digit' });
+        historyEntries.unshift({
+            expression: expression,
+            result: resultValue,
+            time: timestamp
+        });
+        if (historyEntries.length > 30) historyEntries.pop();
+        renderHistory();
+    }
+
+    // render history panel
+    function renderHistory() {
+        if (!historyContainer) return;
+        if (historyEntries.length === 0) {
+            historyContainer.innerHTML = `<div style="text-align: center; color: #8aa0b2; padding: 1rem;">✨ No calculations yet.<br>Press any operation ✨</div>`;
+            return;
+        }
+        const historyHtml = historyEntries.map(entry => `
+            <div class="history-item">
+                <span class="history-expression">${escapeHtml(entry.expression)}</span>
+                <span class="history-result">${escapeHtml(entry.result)}</span>
+                <span style="font-size:0.7rem; color:#6c8eaa;">${entry.time}</span>
+            </div>
+        `).join('');
+        historyContainer.innerHTML = historyHtml;
+    }
+
+    // simple escape for safety
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // core math evaluation with robust edge handling
+    function performOperation(operation) {
+        clearError();
+        let { a, b, rawA, rawB } = getNumbers();
+
+        // check for NaN values if user left empty (but we set default to 0). Actually we set default 0 if parse fails, but we treat empty as 0 warning?
+        const isAempty = inputA.value.trim() === '';
+        const isBempty = inputB.value.trim() === '';
+        if (isAempty || isBempty) {
+            if (isAempty && isBempty) showError("⚠️ Both inputs empty. Using 0 as default.");
+            else if (isAempty) showError("⚠️ First number empty. Using 0.");
+            else showError("⚠️ Second number empty. Using 0.");
+            // but we still have a,b as parsed or 0, so continue. Not blocking.
+        }
+
+        let result;
+        let expression = "";
+        let success = true;
+        let resultString = "";
+
+        switch (operation) {
+            case 'add':
+                result = a + b;
+                expression = `${formatNumber(a)} + ${formatNumber(b)}`;
+                break;
+            case 'subtract':
+                result = a - b;
+                expression = `${formatNumber(a)} - ${formatNumber(b)}`;
+                break;
+            case 'multiply':
+                result = a * b;
+                expression = `${formatNumber(a)} × ${formatNumber(b)}`;
+                break;
+            case 'divide':
+                if (b === 0) {
+                    showError("❌ Division by zero is undefined.");
+                    mainResultSpan.innerText = "Undefined";
+                    operationLabelSpan.innerText = "Division by zero ✖️";
+                    return;
+                }
+                result = a / b;
+                expression = `${formatNumber(a)} ÷ ${formatNumber(b)}`;
+                break;
+            case 'power':
+                // exponentiation: A^B. handle edge cases: 0^0 -> 1 (common math convention)
+                if (a === 0 && b === 0) {
+                    result = 1;
+                } else if (a === 0 && b < 0) {
+                    showError("⚠️ 0 raised to negative exponent → Infinity / undefined.");
+                    mainResultSpan.innerText = "∞ (undefined)";
+                    operationLabelSpan.innerText = "Power invalid";
+                    return;
+                } else {
+                    result = Math.pow(a, b);
+                    if (!isFinite(result)) {
+                        showError("Result out of range (overflow or infinite)");
+                        mainResultSpan.innerText = "Overflow";
+                        operationLabelSpan.innerText = "Power error";
+                        return;
+                    }
+                }
+                expression = `${formatNumber(a)} ^ ${formatNumber(b)}`;
+                break;
+            case 'modulus':
+                if (b === 0) {
+                    showError("❌ Modulo by zero is not allowed.");
+                    mainResultSpan.innerText = "Undefined";
+                    operationLabelSpan.innerText = "Modulo zero";
+                    return;
+                }
+                // JavaScript remainder handles negative nicely but keep consistent
+                result = a % b;
+                expression = `${formatNumber(a)} mod ${formatNumber(b)}`;
+                break;
+            default:
+                return;
+        }
+
+        if (success && result !== undefined) {
+            // format result nicely: avoid scientific for small decimals but keep precision up to 8 decimals
+            let displayResult;
+            if (Number.isNaN(result)) {
+                showError("Computation resulted in NaN (invalid operation)");
+                mainResultSpan.innerText = "NaN";
+                operationLabelSpan.innerText = "Invalid";
+                return;
+            }
+            if (!isFinite(result)) {
+                showError("Result is infinite (±∞)");
+                mainResultSpan.innerText = "∞";
+                operationLabelSpan.innerText = "Infinite";
+                return;
+            }
+            // smart rounding for readability
+            if (Number.isInteger(result)) {
+                displayResult = result.toString();
+            } else {
+                // round to 8 decimal places maximum, trim trailing zeros
+                displayResult = parseFloat(result.toFixed(8)).toString();
+            }
+            resultString = displayResult;
+            mainResultSpan.innerText = resultString;
+            let opSymbol = "";
+            switch (operation) {
+                case 'add': opSymbol = "Addition"; break;
+                case 'subtract': opSymbol = "Subtraction"; break;
+                case 'multiply': opSymbol = "Multiplication"; break;
+                case 'divide': opSymbol = "Division"; break;
+                case 'power': opSymbol = "Exponentiation"; break;
+                case 'modulus': opSymbol = "Modulo"; break;
+                default: opSymbol = "Operation";
+            }
+            operationLabelSpan.innerText = `${opSymbol} completed ✓`;
+            // Add to history
+            const historyExpression = `${expression} = ${resultString}`;
+            addHistory(historyExpression, resultString);
+        } else if (!success) {
+            // already handled
+            return;
+        } else {
+            // fallback
+            mainResultSpan.innerText = "Error";
+        }
+    }
+
+    // Format number nicely: avoid .0 if integer but keep small decimals
+    function formatNumber(num) {
+        if (Number.isNaN(num)) return "NaN";
+        if (!isFinite(num)) return "∞";
+        if (Number.isInteger(num)) return num.toString();
+        // trim long decimals
+        let trimmed = parseFloat(num.toFixed(6)).toString();
+        return trimmed;
+    }
+
+    // Event listeners for operation buttons
+    addBtn.addEventListener('click', () => performOperation('add'));
+    subtractBtn.addEventListener('click', () => performOperation('subtract'));
+    multiplyBtn.addEventListener('click', () => performOperation('multiply'));
+    divideBtn.addEventListener('click', () => performOperation('divide'));
+    powerBtn.addEventListener('click', () => performOperation('power'));
+    modulusBtn.addEventListener('click', () => performOperation('modulus'));
+
+    // Clear history
+    clearHistoryBtn.addEventListener('click', () => {
+        historyEntries = [];
+        renderHistory();
+        // optional: but not resetting result display, just clear history
+        if (!errorMsgDiv) return;
+        clearError();
+        operationLabelSpan.innerText = 'History cleared';
+        setTimeout(() => {
+            if (operationLabelSpan.innerText === 'History cleared') operationLabelSpan.innerText = 'Ready';
+        }, 1500);
+    });
+
+    // Clear all input fields (reset to default values 0/0 but more friendly: 0 and 1? but keep empty fields? better set placeholder)
+    clearAllFieldsBtn.addEventListener('click', () => {
+        inputA.value = '';
+        inputB.value = '';
+        // after clear, set focus but also show NaN? we'll set default 0? but user might expect empty. but we parse empty as 0, but to avoid confusion, put 0 as placeholder
+        inputA.value = '0';
+        inputB.value = '0';
+        clearError();
+        mainResultSpan.innerText = '—';
+        operationLabelSpan.innerText = 'Fields reset to 0';
+        setTimeout(() => {
+            if (operationLabelSpan.innerText === 'Fields reset to 0') operationLabelSpan.innerText = 'Ready';
+        }, 1200);
+    });
+
+    // Swap values A <-> B
+    swapValuesBtn.addEventListener('click', () => {
+        const valA = inputA.value;
+        const valB = inputB.value;
+        inputA.value = valB;
+        inputB.value = valA;
+        clearError();
+        operationLabelSpan.innerText = 'Values swapped';
+        // auto re-evaluate? we don't compute automatically, but we can update the main result? not needed, keep.
+        setTimeout(() => {
+            if (operationLabelSpan.innerText === 'Values swapped') operationLabelSpan.innerText = 'Ready';
+        }, 1000);
+        // optional: keep displayed result neutral
+        mainResultSpan.innerText = '—';
+    });
+
+    // random values between -50 and 50 with 2 decimals
+    setRandomBtn.addEventListener('click', () => {
+        const randomA = (Math.random() * 100 - 50).toFixed(2);
+        const randomB = (Math.random() * 100 - 50).toFixed(2);
+        inputA.value = randomA;
+        inputB.value = randomB;
+        clearError();
+        operationLabelSpan.innerText = `Random: A=${randomA}, B=${randomB}`;
+        mainResultSpan.innerText = '—';
+        setTimeout(() => {
+            if (operationLabelSpan.innerText.includes('Random')) operationLabelSpan.innerText = 'Ready';
+        }, 2000);
+    });
+
+    // keyboard convenience: press Enter on input fields? optional: maybe re-run last operation, but not needed, but we can listen for Enter to re-run last? not necessary
+    // Additional: live update? not needed but adds comfort? avoid clutter.
+
+    // Add quick hint: double click on result area? ignore.
+    // If input numbers are changed, clear the result display to indicate new calculation needed.
+    function clearResultOnInputChange() {
+        mainResultSpan.innerText = '—';
+        operationLabelSpan.innerText = 'Enter values & choose op';
+        clearError();
+    }
+    inputA.addEventListener('input', clearResultOnInputChange);
+    inputB.addEventListener('input', clearResultOnInputChange);
+
+    // initial default values set to 12 and 4 -> display welcome operation but no auto compute until click.
+    // set demo: but let first load display ready.
+    window.addEventListener('load', () => {
+        mainResultSpan.innerText = '—';
+        operationLabelSpan.innerText = 'Ready — click any operation';
+        // also set sample values as per input default: A=12, B=4
+        inputA.value = "12";
+        inputB.value = "4";
+        historyEntries = [];
+        renderHistory();
+    });
+</script>
+</body>
+</html>
